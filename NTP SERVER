@@ -1,0 +1,29 @@
+NTP
+
+  
+ show ntp status
+
+conf t
+
+ip name-server 8.8.8.8
+
+
+Configurando o horário localmente em um switch Cisco 2960
+
+BrainSW01#clock set 16:15:00 27 nov 2022
+BrainSW01#conf t
+BrainSW01(config)#clock timezone BRA
+BrainSW01(config)#end
+BrainSW01#
+
+ntp server 10.10.1.10
+exit
+
+show clock detail
+show ntp assocoations
+show clock
+
+ Configurando o timestamps
+
+BrainSW01#conf t
+BrainSW01(config)#service timestamps log datetime localtime
