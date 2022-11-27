@@ -1,0 +1,76 @@
+Cenário
+
+Switch core ligando dois L2 nas portas Giga 01 e 02 com as subredes 192.168.10.0, 192.168.20.0,  
+SWI vlan 10, SW2 vlan 20 conectados a 2 hots.
+
+CORE:
+
+1- Criar as Vlans 10 e 20 e configurar as portas Gigas para passar as 2 vlans e atribuir IPs nas interfaces das vlans.
+
+vlan 10
+name 10
+
+vlan 20
+name 20
+
+interface range g0/1-2
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan 10-20
+
+interface g0/1
+switchport access vlan 10
+exit
+
+interface g0/2
+switchport access vlan 20
+exit
+
+Aplicar roteamento
+
+ip routing
+
+interface vlan 10
+
+ip address 192.168.10.254 255.255.255.0
+no shut
+exit
+
+interface vlan 20
+
+ip address 192.168.20.254 255.255.255.0
+no shut
+exit
+
+--------------------------------------------------------------------------------------------------
+
+2 - Configurar os SW1 e SW2 L2, criar as vlan e aplicar o trunk para passar as vlans 10 e 20.
+
+SW1
+vlan 10
+name 10
+
+interface f0/1
+switchport access vlan 10
+
+interface g0/1
+switchport access vlan 10
+switchport mode trunk
+switchport trunk allowed vlan 10-20
+exit
+
+
+SW2
+vlan 20
+name 20
+
+interface f0/1
+switchport access vlan 20
+
+interface g0/1
+switchport access vlan 20
+switchport mode trunk
+switchport trunk allowed vlan 10-20
+exit
+
+
