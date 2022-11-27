@@ -1,0 +1,22 @@
+verificando o OSPF e DEBUG
+
+Show ip ospf neighbor - vizinhaça
+
+show ip ospf interface - info de cada interface
+
+show ip ospf database - ifo das redes que ele conhece
+
+debug ip ospf hello
+
+undebug all 
+
+
+area id
+
+subnet
+
+hello
+
+mds authetication
+
+flags
