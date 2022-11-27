@@ -1,1 +1,97 @@
+core vtp 
+
+CORE
+
+vtp domain cisco
+vtp version 2
+vtp password cisco
+
+show vtp status
+
+interface f 0/1
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan all
+
+interface f 0/2
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan all
+
+interface f0/3
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan all
+
+
+Configurar vlans
+
+
+vlan 100
+name 100
+
+vlan 200
+name 200
+
+vlan 300
+name 300
+
+interface vla 100
+ip address 192.168.100.254
+no sh
+
+interface vla 200
+ip address 192.168.200.254
+no sh
+
+interface vla 300
+ip address 192.168.300.254
+no sh
+
+
+
+--------------------------------------
+
+SW01 l2
+
+vtp mode client
+vtp domain cisco 
+vtp password cisco
+vtp version 2
+
+sh vtp status
+
+interface f0/1
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan all
+------------------------------------
+
+SW02 l2
+
+vtp mode client
+vtp domain cisco 
+vtp password cisco
+vtp version 2
+
+sh vtp status
+
+interface f0/1
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan all
+
+--------------------------------------
+
+SW03
+
+vtp mode transparent
+vtp domain cisco
+vtp password cisco
+vtp version 2
+
+interface f0/1
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan all
 
