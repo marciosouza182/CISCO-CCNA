@@ -1,0 +1,21 @@
+Fazer backup da IOS
+
+#copy flash: tftp arquivo de origem.bin
+ip do server
+
+Fazer o Update da IOS
+
+1: deletar a IOS
+
+#delete flash:arquivo.bin
+
+# copy tftp flash: 
+ip do tftp
+nome do arquivo
+
+Para validar
+
+reiniciar o equipamento
+
+reload
+
