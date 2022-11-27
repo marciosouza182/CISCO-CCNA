@@ -1,0 +1,20 @@
+DHCP
+
+conf t
+
+ip dhcp excluded-address 172.16.10.1 172.16.10.10
+ip dhcp pool XPTO
+network 172.16.10.0 255.255.255.0
+default-router 172.16.10.1
+dns-server 8.8.8.8 8.8.4.4
+lease 1 0 0
+domain-name adelco.local
+exit
+
+show dhcp binding
+
+show ip dhcp pool
+
+relay
+
+ip helper-address 10.1.1.1
