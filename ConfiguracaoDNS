@@ -1,0 +1,16 @@
+Habilitando o recurso de Resolução de Nomes de Domínio no Switch e Router
+
+#ip domain-lookup
+
+Configurando o Nome de Domínio no Switch e Router
+
+#ip domain-name vaamonde.pti
+
+Configurando o Endereço IPv4 do Servidor de DNS no Switch e Router
+
+#ip name-server 192.168.3.1
+
+Adicionando manualmente a Resolução de Nomes e Endereços Estáticos no Switch e Router
+
+#ip host servidor 192.168.3.1
+
