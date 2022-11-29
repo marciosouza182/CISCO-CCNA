@@ -27,3 +27,10 @@ show clock
 
 BrainSW01#conf t
 BrainSW01(config)#service timestamps log datetime localtime
+
+
+Comandos para teste e verificação do Sincronismo do NTP Server
+
+show ntp status
+show ntp associations
+show clock
