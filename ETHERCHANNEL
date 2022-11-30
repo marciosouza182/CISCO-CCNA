@@ -1,0 +1,31 @@
+Configuração de 2 SW para Etherchannel
+
+S1(config)# interface range FastEthernet 0/1 - 2
+
+S1(config-if-range)# channel-group 1 mode active
+
+Creating a port-channel interface Port-channel 1
+
+S1(config-if-range)# exit
+
+S1(config-if)# interface port-channel 1
+
+S1(config-if)# switchport mode trunk
+
+S1(config-if)# switchport trunk allowed vlan all
+
+-------------------------------------------------------------------
+
+S2(config)# interface range FastEthernet 0/1 - 2
+
+S2(config-if-range)# channel-group 1 mode active
+
+Creating a port-channel interface Port-channel 1
+
+S2(config-if-range)# exit
+
+S2(config-if)# interface port-channel 1
+
+S2(config-if)# switchport mode trunk
+
+S2(config-if)# switchport trunk allowed vlan all
