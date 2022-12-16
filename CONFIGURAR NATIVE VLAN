@@ -1,0 +1,15 @@
+Utilizando o conceito de VLAN Nativa!
+
+Como a VLAN Nativa não tem tag, ou seja, não faz a marcação dos quadros, o switch recebe esse quadro e encaminha para as portas que estão vinculadas à 
+VLAN Nativa seguindo o princípio básico de encaminhamento de quadros em portas de acesso!
+
+
+COMANDOS
+
+VLAN 99
+
+int g0/1
+Switchport mode trunk
+switchport trunk native vlan 99
+
+
