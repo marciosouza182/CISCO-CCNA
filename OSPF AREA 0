@@ -1,0 +1,48 @@
+O OSPF (Open Shortest Path First) é um Protocolo de Roteamento Dinâmico para redes que operam com o Protocolo IPv4
+
+conf t
+
+router ospf 10
+
+
+Configurando a Identificação do Router no Processo do OSPF
+			!DICA: essa opção configura o recurso do Router-ID que será utilizado na Eleição é também para formar 
+			!adjacência entre os vizinhos do Domínio do OSPF
+			!OBSERVAÇÃO: no processo local do Protocolo OSPF, essa opção é muito importante para a escolha do roteador 
+			!DR ou BDR na Topologia do OSPF, caso não seja configurado o Priority-ID.
+      
+router-id 3.3.3.3
+
+network 1.1.1.1 0.0.0.255 area0
+
+
+
+Configurando a Mensagem Resumida de Autenticação do Protocolo OSPF
+			!DICA: essa opção habilita o recurso de resumo de mensagens de autenticação do protocolo OSPF
+			!OBSERVAÇÃO: nessa configuração indicamos que essa interface vai utilizar o recurso de autenticação para 
+			!formar adjacência entre as vizinhanças
+			ip ospf authentication message-digest
+
+			!Configurando a Chave de Autenticação MD5 do Protocolo OSPF
+			!DICA: essa opção habilita o recurso de criptografia MD5 da autenticação do protocolo OSPF
+			!OBSERVAÇÃO: nessa configuração indicamos que vamos utilizar o número da Chave, o tipo de criptografia e 
+			!falamos no final a chave de autenticação do protocolo OSPF utilizada (a senha fica em texto plano no 
+			!running-config e startup-config)
+			ip ospf message-digest-key 1 md5 ospf10
+			end
+
+interface gigabitEthernet 0/1
+			ip ospf authentication message-digest
+			ip ospf message-digest-key 1 md5 ospf10
+      
+      
+      
+      Configurando a Origem da Rota Padrão para os outros Roteadores no Processo do OSPF
+			!DICA: essa opção possibilita informar no processo local do OSPF que esse roteador possui a rota padrão
+			!OBSERVAÇÃO: igual ao Protocolo RIPv2, o roteador de Borda com a Internet que possui a Rota Padrão será 
+			!anunciado no processo do Protocolo OSPF, essa rota será propagada para todos os Router ou Switch Layer 3 
+			!do Domínio do OSPF na Área Normal (em nosso exemplo Area 0), o OSPF, por padrão, não gera uma rota padrão 
+			!para o Domínio do OSPF.
+			default-information originate
+      
+      
