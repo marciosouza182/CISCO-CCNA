@@ -67,6 +67,9 @@ SWDST01(config-if)#standby 10 track 1 decrement 30
 SWDST01(config)#track 1 interface gigabitEthernet 0/0 line-protocol
 SWDST01(config-track)#end
 
-
+2º
+Track Interface
+SWDST01(config)#interface vlan 10
+SWDST01(config-if)#standby 10 track gigabitEthernet 0/0 30
 Note que definimos o grupo standby 10 (previamente configurado),  apontamos um track 1, e definimos que se o track for acionado, 
 terá um decréscimo de 30  (decrement 30) na prioridade do roteador.
