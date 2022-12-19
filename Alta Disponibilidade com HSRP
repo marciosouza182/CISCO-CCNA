@@ -1,0 +1,72 @@
+Quando alta disponibilidade se torna uma necessidade, utilizamos os First Hop Redundancy Protocols (FHRPs) que nos permitem 
+configurar mais de um roteador físico para agir como se fossem logicamente um. Existem protocolos proprietários como HSRP, 
+GLBP (Cisco), ESRP (Extreme Networks), além do VRRP que é um protocolo definido pelo IEEE, descrito na RFC5798 e RFC3768 (obsoleta).
+
+Falaremos hoje sobre o Hot Standby Router Protocol (HSRP), desenvolvido pela Cisco, e que é utilizado para fornecer redundância 
+de gateway em redes locais.
+
+Geralmente rodando na camada de distribuição, o HSRP utiliza endereço MAC e IP virtuais compartilhado pelos membros
+do grupo HSRP, que deve conter um Active Router (responsável por realizar o encaminhamento dos pacotes) e um ou mais 
+Standby Router, que assumirá o papel de Active somente em caso de falha. O HSRP não foi projetado para ser um substituto 
+para os protocolos de roteamento dinâmico e eles devem ser utilizados sempre que possível.
+
+es de iniciarmos, vamos a algumas considerações importantes.
+
+Mensagens Hello: No HSRPv1 a comunicação entre os roteadores é feita usando multicast, endereço 224.0.0.2 e porta UDP 1985, enquanto 
+no HSRPv2 os pacotes Hello são enviados para o endereço multicast 224.0.0.102 na porta UDP 2029. Essas mensagens contém todas 
+as informações pertinentes ao funcionamento do HSRP, como timers, prioridade, autenticação, versão, entre outros não menos importantes.
+HSRP Timers:  O Hello Timer é intervalo de tempo entre cada mensagem Hello (por padrão 3s). Já o Hold Timer (intervalo de tempo para 
+detectar a falha de um roteador), por padrão é definido em 10s. É recomendado manter sempre ao menos o triplo do Hello Timer para evitar
+que uma perda de pacote seja identificada como queda do roteador. A cada Hello recebido o Hold Timer é zerado. Ambos podem ser 
+configurados afim de se obter um menor delay na detecção de falha.
+Processo de Eleição: Primeiramente utiliza-se a prioridade, que por padrão é definida como “100”, mas é customizável com valores
+entre 0 e 255. O roteador com a maior prioridade será o Active Router. Em caso de empate assumirá o roteador com o maior IP.
+Preempt: Se um roteador com menor prioridade assumir o encaminhamento dos pacotes, qualquer roteador que ingressar no grupo após o 
+Active já estar eleito, mesmo que sua prioridade seja maior, não se tornará Active caso o comando preempt estiver ausente na configuração.
+Interface Tracking: Permite o processo HSRP monitorar uma interface do roteador e caso ela altere seu status para “down”, será decrementado 
+o valor da prioridade, consequentemente deixará de ser o Active Router.
+Virtual Address: Como citado anteriormente, o HSRP utiliza MAC e IP virtuais.
+MAC: O endereço MAC do HSRP versão 1 é 0000.0C07.ACxx, aonde xx é definido pelo número do grupo HSRP convertido para hexadecimal, 
+possibilitando até 256 grupos. Por exemplo, o HSRP grupo 10 utilizará o endereço 0000.0C07.AC0A. Já o HSRP versão 2 utiliza o MAC 0000.0C9F.Fxxx, 
+onde xxx é definido pelo número do grupo HSRP convertido para hexadecimal, permitindo até 4096 grupos.
+IP: Endereço definido pelo administrador, será o gateway da rede de acesso.
+
+
+Configuração do switch SWDST01
+SWDST01(config)#vlan 10
+SWDST01(config)#interface vlan 10
+SWDST01(config-if)#ip address 192.168.10.1 255.255.255.0
+SWDST01(config-if)#standby 10 ip 192.168.10.254
+SWDST01(config-if)#standby 10 preempt
+SWDST01(config-if)#standby 10 priority 120
+Configuração do switch SWDST02
+
+Seguindo os mesmos conceitos realizados no switch SWDST01, vamos configurar o segundo switch,  porém mantendo o prioridade default (100), 
+para que esse roteador seja o Standby Router.
+
+SWDST02(config)#vlan 10
+SWDST02(config)#interface vlan 10
+SWDST02(config-if)#ip address 192.168.10.2 255.255.255.0
+SWDST02(config-if)#standby 10 ip 192.168.10.254
+SWDST02(config-if)#standby 10 preempt
+
+
+Analisando a saída dos comando realizados, podemos ver que o SWDST01 assumiu o encaminhamento de pacotes conforme deveria.
+A partir deste momento o SWDST02 ficará no modo “standby” até o switch principal falhar.
+
+Mas e se os uplinks do SWDST01 falharem?
+
+É ai que aplicamos o interface track. Uma questão importante é que a implementação desta função varia de acordo com o modelo do 
+equipamento e a sua versão de software.
+
+Vou mostrar duas formas, usadas com mais frequência.
+
+Track Object
+SWDST01(config)#interface vlan 10
+SWDST01(config-if)#standby 10 track 1 decrement 30
+SWDST01(config)#track 1 interface gigabitEthernet 0/0 line-protocol
+SWDST01(config-track)#end
+
+
+Note que definimos o grupo standby 10 (previamente configurado),  apontamos um track 1, e definimos que se o track for acionado, 
+terá um decréscimo de 30  (decrement 30) na prioridade do roteador.
