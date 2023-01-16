@@ -13,7 +13,7 @@ R2(config-line)#transport input ssh
 R2(config-line)#logging synchronous 
 R2(config-line)# exit 
 R2(config)#ip ssh time-out 60 
-R2(config)#ip authentication-retries 2 
+R2(config)#ip ssh authentication-retries 2 
 
 
 conf t
@@ -28,7 +28,7 @@ transport input ssh
 logging synchronous 
 exit 
 ip ssh time-out 60 
-ip authentication-retries 2 
+ip ssh authentication-retries 2 
 end
 wr
 !
