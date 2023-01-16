@@ -33,3 +33,21 @@ configure terminal
 			no shutdown
 			end
 write
+
+
+
+                conf t
+		hostname SW01
+		service password-encryption
+		service timestamps log datetime msec
+		no ip domain-lookup
+		banner motd #AVISO: acesso autorizado somente a funcionarios#
+		username admin privilege 15 secret @ade123
+		enable secret @ade123
+		line console 0
+		login local
+		password @ade123
+		logging synchronous
+		exec-timeout 5 30
+		exit	
+		!
