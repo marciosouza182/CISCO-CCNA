@@ -4,7 +4,7 @@ Router>enable
 Router#config terminal 
 Router(config)#hostname R2 
 R2(config)#ip domain-name cisco
-R2(config)#crypto key generate rsa 
+R2(config)#crypto key generate rsa general-keys modulus 2048
 R2(config)#ip ssh version 2 
 R2(config)#username admin pri 15 secret cisco 
 R2(config)#line vty 0 4 
@@ -19,7 +19,7 @@ R2(config)#ip ssh authentication-retries 2
 conf t
 hostname SW01
 ip domain-name cisco
-crypto key generate rsa 
+crypto key generate rsa general-keys modulus 2048
 ip ssh version 2 
 username admin pri 15 secret cisco 
 line vty 0 4 
