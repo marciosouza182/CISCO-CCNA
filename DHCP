@@ -18,3 +18,23 @@ show ip dhcp pool
 relay
 
 ip helper-address 10.1.1.1
+
+Script
+
+ip dhcp excluded-address 192.168.10.1 192.168.10.20
+ip dhcp excluded-address 192.168.20.1 192.168.20.20
+ip dhcp excluded-address 192.168.30.1 192.168.30.20
+!
+ip dhcp pool rede10
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.254
+ dns-server 8.8.8.8
+ip dhcp pool rede20
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.254
+ dns-server 8.8.8.8
+ip dhcp pool rede30
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.254
+ dns-server 8.8.8.8
+!
