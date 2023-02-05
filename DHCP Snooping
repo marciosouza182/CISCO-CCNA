@@ -1,0 +1,43 @@
+> DHCP SNOOPING - Evitar ataque ddos ou man in the middle, quando algum server dhcp malicioso na rede, muitas vezes causado por algum usuário 
+que burla as regras de IT da empresa ou hacker atraves de ataque DDOS.
+
+
+> Para habilitar o DHCP Snooping digite o seguinte comando no modo de configuração global:
+
+Switchconfig)#ip dhcp snooping
+
+  > Agora identifique as VLANs que serão protegidas:
+
+Switch(config)#ip dhcp snooping vlan 10
+Switch(config)#ip dhcp snooping vlan 20
+
+ > Todas as portas do switch ficam no modo untrusted por padrão quando habilitamos o DHCP snooping. Agora vamos configurar as portas onde estão os servidores DHCP da rede como trusted:
+
+Switch#conf t
+Switch(config)#interface FastEthernet 0/0
+Switch(config-if)#ip dhcp snooping trust
+
+> Podemos também configurar um limite de requisições DHCP que passam em uma interface, o rate pode ser um valor de 1 a 2048 pacotes por segundo:
+
+Switch(config)#interface FastEthernet 2/1
+Switch(config-if)#ip dhcp snooping limit rate 50
+
+> Por padrão é habilitado a opção 82 DHCP, que é descrita na RFC 3046 publicada em janeiro de 2001 ( http://www.rfc-archive.org/getrfc.php?rfc=3046 ). 
+Quando uma requisição DHCP é interceptada em uma porta untrusted, o switch adiciona seu próprio MAC e um identificador da porta de origem no campo option-82, 
+em seguida encaminha para o servidor DHCP. Quando retorna o pacote reply o switch compara o campo option-82 para confirmar que a requisição foi originada 
+de uma porta válida:
+
+> Switch(config)#ip dhcp snooping information option
+
+ > Para verificar as configurações do DHCP Snooping, utilize o comando “show ip dhcp snooping”. Somente portas que estão como trusted ou com rate-limit 
+ serão listadas:
+ 
+ show ip dhcp snooping
+ 
+ show ip dhcp snooping binding
+ 
+ 
+ 
+ 
+ 
+ 
