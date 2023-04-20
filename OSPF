@@ -45,4 +45,36 @@ interface gigabitEthernet 0/1
 			!para o Domínio do OSPF.
 			default-information originate
       
+      COnfigurando o custo da banda
+      route ospf 10
+      auto-cost reference-bandwidth 10000
+      
+      Use este comando para configurar o custo de uma interface que um dispositivo 
+anuncia para seus vizinhos OSPF. O OSPF calcula o custo de uma rota como a proporção
+da largura de banda de referência para a largura de banda da interface de saída. 
+Um aumento na largura de banda de referência resulta em um custo maior. 
+Se o custo resultante for menor que 1, o software arredonda o custo para 1.
+      
+      Point to Point
+      
+      Um tipo de rede Ponto a Ponto é, como o próprio nome indica, uma conexão entre dois pontos específicos 
+(ou roteadores OSPF). Em um link ponto a ponto, um pacote entregue por um dos roteadores sempre terá 
+precisamente um destinatário. Ele não mantém uma relação DR/BDR e possui um temporizador de 10 segundos
+e um timer morto de 40 segundos. As linhas alugadas que executam o protocolo ponto a ponto (PPP) e o controle 
+de link de dados de alto nível (HDLC) são alguns exemplos de links ponto a ponto.
+
+imterface g0/1
+ip ospf network point-to-point
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       
