@@ -1,1 +1,89 @@
 
+# O Border Gateway Protocol (BGP) é um protocolo de roteamento para a internet. Assim como o correio processa correspondências, 
+BGP escolhe as rotas mais eficientes para fornecer o tráfego da internet.
+
+# AS - Conjunto de redes em um unico dominio administrativo
+
+# PATH VECTOR -AS PATH - 
+
+# INTER-ROUTER COMMUNICATION - BGP não utiliza pacotes hello para descobrir vizinhos e a vizinhança não pode ser formada dinamicamente.
+Ele utiliza TCP porta 179 para se comunicar com outros roteadores BGP.
+
+ # Internal BGP (iBGP): Sessão BGP formada entre roteadores do mesmo AS, prefixos são colocados com
+administrative distance (AD) 200. TTL nos pacotes iBGP são setados como 255.
+
+# External BGP (eBGP): Sessão BGP formada entre roteadores de diferentes AS, prefixos são colocados com administrative distance (AD) 20. TTL nos
+pacotes eBGP são setados como 1, então por padrão a Multi-Hop session não pode ser feita no eBGP (esse comportamento pode ser alterado).
+
+# No eBGP as rotas enviadas para um vizinho tem o IP do próximo salto alterado para o IP do próprio roteador que envia as
+rotas, coisa que não acontece no iBGP.
+
+# Como utiliza TCP, para formar adjacência (BGP session) os roteadores não precisam estar diretamente conectados.
+
+# Nesse caso por exemplo, o R2 precisa ter uma rota para alcançar o R4 e o R4 deve alcançar o R2, pode ser uma rota
+estática ou um IGP como o OSPF, rota default não funciona.
+
+# CONFIGURAÇÃO BÁSICA eBGP UTILIZANDO EXEMPLO AS 819 PARA R1 e 700 PARA R2
+
+
+R1# conf t                               R2# conf t
+R1# router bgp 819                       R2# router bgp 700
+R1# neighbor 78.0.0.2 remote-as 700      R2# neighbor 78.0.0.1 remote-as 819
+
+# Verificar os neighbors
+
+show ip bgp summary ou show bgp ipv4 uniscats summary
+Neighbor V AS MsgRcvd MsgSent TblVer InQ OutQ Up/Down State/PfxRcd
+78.0.0.2 4 700 0 0 1 0 0 never Idle
+
+# BGP Finite-State Machine - FSM
+
+1 - Idle - é o primeiro estágio do BGP FSM. O BGP detecta um evento inicial e tenta iniciar uma conexão TCP com o peer BGP e
+também escuta uma nova conexão a partir de um peer.
+
+2 - Connerct - No estado Connect, o BGP inicia a conexão TCP
+
+3 - Active - No Active state, o BGP inicia um novo three-way handshake TCP.
+
+4 - Open sent - OpenSent, uma mensagem Open foi enviada do roteador de origem e aguarda uma mensagem Open do outro roteador.
+
+5 - Open Confirm - OpenConfirm, o BGP aguarda uma mensagem KEEPALIVE ou NOTIFICATION. Após o recebimento da mensagem KEEPALIVE de um vizinho, o estado
+é movido para Established.
+
+1 OPEN Configura e estabelece a adjacência BGP
+2 UPDATE Anuncia, atualiza ou retira rotas
+3 NOTIFICATION Indica uma condição de erro para um vizinho BGP
+4 KEEPALIVE Garante que os vizinhos BGP ainda estejam vivos
+
+# Divulgando prefixos (redes)
+
+Router bgp 65100 
+neighbor 10.12.1.2 remote-as 65200
+network 10.12.1.0 mask 255.255.255.0                                         
+                                                                        
+Usando address-family
+
+router bgp 65200
+no bgp default ipv4-unicast
+neighbor 10.12.1.1 remote-as 65100
+address-family ipv4
+network 10.12.1.0 mask 255.255.255.0
+neighbor 10.12.1.1 activate
+exit-address-family
+
+Comando para verificar
+show bgp ipv4 unicast
+show ip bgp
+Show ip bgp ipv4 unicast neighbors 46.0.0.1 advertided-routers
+
+
+
+
+
+
+
+
+
+
+
+
