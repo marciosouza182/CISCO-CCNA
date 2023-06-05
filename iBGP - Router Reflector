@@ -1,0 +1,60 @@
+Router Reflector - Melhorias de escabilidade iBGP
+
+A incapacidade do BGP de anunciar um prefixo aprendido de um peer iBGP para outro peer iBGP pode levar a problemas de escalabilidade em um AS.
+
+A fórmula n(n−1)/2 fornece o número de sessões necessárias, onde n representa o número de roteadores.
+
+Uma topologia full-mesh de 5 roteadores requer 10 sessões iBGP e uma topologia de 8 roteadores requer 28. A escalabilidade do 
+iBGP torna-se um problema para grandes redes.
+
+A RFC 1966 introduz a ideia de que o peering iBGP pode ser configurado de modo que reflita rotas para outro peer iBGP. O
+roteador que está refletindo as rotas é conhecido como um Router Reflector (RR), e o roteador que está recebendo as
+rotas refletidas é um route reflector client.
+
+É importante ter em mente que o RR faz apenas o ControlPlane, o Data Plane (tráfego) não necessariamente irá passar
+pelo RR e sim pelo melhor caminho escolhido pelo BGP.
+
+Configuração:
+
+Escolha um roteador para ser o router reflector, neste exemplo iremos usar o R1:
+
+R1#                                                 R3#
+(1)conf t                                           (1)conf t
+(2)router bgp 12345                                 (2)router bgp 12345
+(3)neighbor 10.3.3.3 remote-as 12345                (3)neighbor 10.1.1.1 remote-as 1234
+(4)neighbor 10.3.3.3 route-reflector-client         (4)neighbor 10.1.1.1 next-hop-self
+(5)end                                              (5)neighbor 10.1.1.1 update-source lo0
+(6)wr
+
+Router reflector e Peer Group no RI - autmatização de template para melhor configuração:
+
+As configurações do BGP podem se tornar bastante grandes à medida que os recursos sãoconfigurados ou as sessões do 
+BGP aumentam. Os sistemas operacionais baseados em IOS fornecem métodos para aplicar uma configuração semelhante a vários vizinhos. 
+Isso simplifica a configuração do ponto de vista da implantação e facilita a leitura da configuração
+
+Template:
+
+R1#
+(1) router bgp 12345
+(2) neighbor KALAU peer-group
+(3) neighbor KALAU remote-as 12345
+(4) neighbor KALAU update-source lo0
+(5) neighbor KALAU route-reflector-client
+(6) neighbor KALAU next-hop-self
+(7) neighbor 10.4.4.4 peer-group KALAU
+(8) neighbor 10.5.5.5 peer-group KALAU
+(9) neighbor 10.2.2.2 peer-group KALAU
+(10)neighbor 10.3.3.3 peer-group KALAU
+
+
+
+
+
+Melhorias de escalabilidade iBGP - Router Reflector - Regras
+
+Regra 1: Se um RR receber um NLRI de um Non- RR Client, o RR anunciará o NLRI a um cliente.
+
+Regra 2: Se um RR receber um NLRI de um cliente RR, ele anunciará o NLRI para clientes RR e não RR. Mesmo o cliente 
+RR que enviou o anúncio recebe uma cópia da rota, mas descarta o NLRI porque se vê como o originador da rota.
+
+Regra 3: se um RR receber uma rota de um peer eBGP, ele anunciará a rota para clientes RR e Non-RR Client.
