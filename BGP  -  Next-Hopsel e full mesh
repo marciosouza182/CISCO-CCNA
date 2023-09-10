@@ -3,7 +3,7 @@ iBGP por padraão não altera o next-hop, o resuros nextholp-self modifica o end
 que origina a sessão BGP.
 
 O comando neighbor ip-address next-hop-self [all] é usado para cada vizinho sob a configuração address family. 
-O recurso next-hop-self não modifica o endereço dopróximo salto para prefixos iBGP por padrão. 
+O recurso next-hop-self não modifica o endereço do próximo salto para prefixos iBGP por padrão. 
 Os nodes IOS podem anexar a palavra-chave opcional all, que também modifica o endereço do próximo salto nos prefixos iBGP.
 
 exemplo: 
