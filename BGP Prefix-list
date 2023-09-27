@@ -16,4 +16,24 @@ R8#
 (2)neighbor 10.91.0.1 route-map PIKACHU in
 (3)end
 (4)wr
-3
+
+Engenharia de tráfego: Influenciar o upload manipulando o Local Preference
+
+R8#
+(1)conf t
+(2)router bgp 819
+(3)no neighbor 10.91.0.1 route-map PIKACHU in
+
+R8#
+(1)conf t
+(2)route-map BULBA
+(3)match ip address prefix-list REDE20
+(4)set local-preference 777
+(5)route-map BULBA permit 20
+(6)exit
+
+router bgp 819
+(2)neighbor 78.0.0.2 route-map BULBA in
+(3)end
+(4)clear ip bgp * soft
+
