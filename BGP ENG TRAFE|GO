@@ -1,0 +1,20 @@
+
+PATH Selection --> 
+
+Prefix-list ---> ma lista de prefixos permite que os sistemas de roteamento determinem quais rotas devem ser aceitas quando eles fazem peering com outras redes . 
+Inclui prefixos IP com critérios de correspondência que permitem ou negam a redistribuição de rotas. Ele contém uma ou mais entradas ordenadas que são processadas sequencialmente.
+
+Route map ----> Route Maps fornecem muitos recursos diferentes para uma variedade de protocolos de roteamento.
+No nível mais simples, elas podem filtrar redes, mas também fornecem recursos adicionais por meio da adição ou modificação de atributos de rede.
+Route Maps são críticas para o BGP porque são o principal componente na modificação de uma política de roteamento exclusiva por vizinho
+
+AS-PATH ----->
+
+Agregação de rotas -----> A sumarização ou agregação de rotas é a técnica para diminuir o tamanho da tabela de roteamento.
+
+
+#Agregar a rede mãe
+conf t
+router bgp 12345
+aggregate-address 1.10.0.0 255.255.0.0
+end
