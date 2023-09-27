@@ -1,0 +1,297 @@
+O BGP é um protocolo de roteamento advanced distance vector chamado de Path Vector desenvolvido para ISP's trocarem rotas isentas de loops. Ele antém uma tabela separada da tabela de roteamento
+“IP BGP Table” e “Route Table”, se não for bem configurado pode fazer com que o meio externo influencie nas decisões de roteamento. Sua conexão com vizinho é configurada manualmente 
+e possui atualizações confiáveis via TCP na porta 179 com envio de keepalive periódico. Não exige topologia hierárquica.
+
+Possui uma lista do caminho completo até a rede de destino incluindo os AS's. O mecanismo para evitar loop é o Split Horizon, onde rotas aprendidas por um IBGP não são propagadas para os IBGPS vizinhos, 
+sendo assim é necessário Full-Mesh ou o uso de roteadores refletores ou confederações.
+Assim como os endereços IPs privados, os AS privados são 64512 to 65535. Seu roteamento não é aplicado nas interfaces e sim no router inteiro. Passive-interface não funciona.
+O roteamento é baseado em políticas, porém, as políticas não podem influenciar como o AS vizinho irá rotear o seu tráfego, mas pode influenciar a forma como o seu trafego chega até o AS vizinho.
+
+Quando não usar BGP? - Use rota estática
+Tiver uma conexão simples com Internet (ISP) ou outro AS;
+Não há preocupação com políticas e seleção de rotas;
+Mesma política de roteamento utilizada pelo ISP (Bloco CIDR pertencente ao ISP);
+Roteador com pouca memória;
+Compreensão limitada de filtro de rotas e seleção de caminhos;
+Baixa largura de banda entre AS's.
+
+Tipos de BGP
+IBGP - Internal BGP opera entre vizinhos no mesma AS. Não necessariamente precisam estar conectados físicamente;
+EBGP - External BGP opera entre dois vizinhos conectados em diferentes ASs, não precisam estar diretamente conectados;
+Quando o EBGP anuncia uma rota do seu vizinho ele anuncia o vizinho como um next-hop;
+Somente rotas originadas no router IBGP são passadas para um vizinho IBGP, rotas aprendidas não são;
+Rotas IBGP aprendidas por outro IBGP são passadas apenas para o EBGP (solução: route-reflector).
+Atributos
+
+São informações sobre as métricas BGP incluídas nas mensagens de atualização do BGP
+
+Well-Known mandatory - atributos bem conhecidos mandatórios - devem aparecer na descrição da rota. É aquele que todas as implementações do BGP devem reconhecer, se propaga para os vizinhos.
+
+Origin - Tipo 1 - Indica a origem da rota. Na tabela BGP aparece como: I= quando aprendida por IGP, E= Quando aprendida por EGP e ?= Quando a origem da rota é desconhecida 
+(para rotas estáticas e de redistribuição);
+AS-path - Tipo 2 - Sempre que uma atualização de rota passa através de uma AS o N.º da AS é pré-anexado aquela atualização (colocado no inicio da lista de AS's que foram atravessadas 
+até chegar o destino. Os routers que divulgam para IBGP não mudam o atributo AS-Path. Garante o ambiente Isento os loops. Para manipular o tráfego com As-path usa-se o prepend.
+Next-Hop - Tipo 3 - Anuncia o próximo salto para alcançar a rede de destino. Geralmente o Next-Hop é o endereço da rede /30. O router EBGP anuncia para o IBGP (routers internos)
+o Next-Hop como o endereço da rede /30 (endereço da rede entre os AS's), os routers do IBGP tem que conhecer a rede /30 entre os As's (EBGP) por um IGP ou rota estática. Em NBMA o router se anuncia.
+
+Well-Known discretionary - atributos bem conhecidos arbitrário - Não precisa aparecer nas descrições de rotas.
+Local Preference - Tipo 5 - Roda internamente na AS, não é passado para os peers EBGP e Informa no AS qual o melhor caminho para sair do AS. Um caminho com Local preference maior é preferido. Default Cisco = 100;
+Atomic aggregate - Tipo 6 - Informa o AS vizinho que o router de origem agregou as rotas;
+
+Optional Transitive - Opcional Transitivo - Opcional, caso o router não possua, deve ser passado inalterado. Propaga-se entre os AS's. Apenas os Opcionais Transitivos podem ser marcados como parciais;
+
+Community - Tipo 8 - Serve para filtrar rotas de entrada e saída baseado na comunidade, 32bits (community Filters);
+Aggregator - Tipo 7 - Informa o ID do router e o AS que executou a agregação da rota.
+Optional nontransitive - Opcional não-transitivo - Roda dentro da AS e deve ser excluído se não implementado
+
+MED - Tipo 4 - Chamado de métrica. É a divulgação de um caminho preferido dentro de um AS para AS’s externos. É uma forma de influenciar outro AS onde ele deve optar para atingir determinada rota.
+Utilizado quando tem 2 entradas para o mesmo AS, quanto mais baixo melhor. Se não estiver habilitado a opção de verificar o MED, em routers CISCO é colocado por default o 0 que indica a melhor rota, mas no padrão IETF é colocado como infinito, a pior rota. Pode-se configurar para manter o padrão: bgp bestpath missing-as-worst;
+Originator-ID – Tipo 9 - Atributo que carrega o router ID e o AS de quem originou a rota;
+Weight - Particular CISCO, uso local somente no router para definir o peso da rota (preferencia) 0 - 65535, default=32768 e 0 para rotas aprendidas por outro BGP speaker, mais alto melhor. 
+Não é propagado para nenhum vizinho, é apenas para uso local. Esse atributo tem prioridade sobre o Local Preference.
+
+Synchronization
+Um router não deve anunciar uma rota fora da AS antes que todos os outros tenham aprendido;
+Gera consistência das informações dentro da AS;
+Evita buracos negros dentro da AS;
+Ligado por Default;
+Não é necessário se o AS não é um AS de transito (AS que liga ASs);
+Desabilitado a convergência é mais rápida;
+Pode ser desabilitado se todos os routers de trânsito estiverem em full-mesh;
+Quando estiver implementado o multihome, deve-se usar a sincronização.
+Tipos de Mensagens
+Open – Primeira mensagem enviada após a conexão TCP ser estabelecida, e confirmada com um keepalive.
+Holdtime - tempo máximo entre mensagens sucessivas de keepalive e update do remetente. 180s de default. Se o holdtime fo zero os routers não enviaram Keepalive;
+BGP router ID - Identifica o remetente, é o maior ip da interface ou da loopback. Igual ao OSPF;
+My AS - O numero da AS do remetente;
+Version - Versão do BGP, a utilizada é a 4;
+BGP identifier (Router ID) – É o identificador do remetente. O ID do router é definido igual no OSPF, pelo maior IP ativo de todas as interfaces a menos que exista um IP no loopback
+Authentication – Se usado;
+Keepalive - Mensagens trocadas de 60 em 60s para verificar se o router está OK, com tempo mais rápido que o holdtime;
+
+Update - Contem informações sobre um caminho, diversos caminhos exige diversas mensagens ;
+
+Withdrawn routes – Lista dos prefixos de endereço IP que estão sendo retiradas de serviço, se houver uma;
+
+Path attributes – Atributos de caminhos, são: As-Path, Origin, Local Preference,... todos os atributos;
+
+Network layer reachability Information – Esse campo contém uma lista dos prefixos de endereço IP que podem ser atingidos por esse caminho;
+
+Notification - Enviada quando ocorre um erro, a conexão é fechada imediatamente
+
+Estado do vizinho BGP
+
+O protocolo BGP é uma máquina de estados, que leva um router através dos seguintes estados:
+
+Idle – Estado inicial;
+Connect – Conexão TCP e aguardo;
+Active – Realiza tentativas de conexão TCP;
+OpenSent – Estado e espera da resposta de conexão do vizinho;
+OpenConfirm – Conexão estabelecida;
+Estabilished – Troca de mensagem de atualização, keepalive e notificação.
+Processo de Seleção de Rotas
+
+Depois do BGP receber todas as informações de todos os AS’s e destinos as começam a ser decididas. Apenas 1 rota para cada destino. A decisão das melhores rotas baseia-se nos atributos.
+
+Se o caminho for interno não deve preferir se a rota não estiver sincronizada, ou seja, não esta na tabela de roteamento IGP;
+Não deve preferir se o endereço de Next-Hop não puder ser acessado;
+Preferir rota de maior Peso (weight), Preferencia local para roteadores Cisco System;
+Preferir rota com Local Preference mais alto dentro da AS (melhor caminho pra sair da AS);
+Se o Local Preference for igual, preferir rota originada pelo router local;
+Se nenhuma rota foi originada localmente, preferir rota com o AS-Path mais curto para o destino;
+Se os caminhos de AS’s forem iguais, preferir o código de origem mais baixo sendo as rotas aprendidas por IGP o melhor (IGP (I)
+Se todos os códigos de origem forem iguais, preferir o caminho com o MED mais baixo (MED é enviado por outro AS);
+Se as rotas têm o mesmo MED, preferir caminhos Externos (EBGP) em vez dos internos (IBGP);
+Se a sincronização estiver desativada apenas existirá caminhos internos, nesse caso escolher o caminho até o vizinho IGP mais próximo, caminho interno mais curto;
+Para caminhos externos EBGP escolher a rota mais antiga para minimizar o efeito flapping (up down);
+Preferir o caminho com o ID do router vizinho mais baixo;
+Preferir a rota com o endereço IP do vizinho mais baixo.
+Peer Groups
+
+Muitos vizinhos são configurados com as mesmas políticas de atualização (por exemplo, mesmo filtro). Em routers CISCO os vizinhos com a mesma política de atualização podem ser agrupados em peer groups.
+É definida uma política para o peer Group e todos os vizinhos vinculados a esse peer group adotam as políticas.
+O nome de um Peer Group é local do router onde ele é configurado e não é passado para nenhum outro router.
+
+Simplifica a configuração dos vizinhos;
+Utilizado nas conexões iBGP e eBGP;
+Todos os vizinhos recebem o mesmo update;
+Updates são gerados uma vez para cada grupo.
+Politicas podem ser modificadas individualmente somente para informações de rotas entrante e não para sainte.
+Route Reflectors
+
+Os refletores de rota modificam a regra do split-horizon que existe por default onde nenhum router replica as rotas aprendidas por um vizinho para outro vizinho, IBGP não replica para IBGP. 
+No entanto uma rota BGP aprendida por um vizinho EBGP é replicada para vizinhos EBGP e IBGP.
+Benefícios
+
+Habilita um router para propagar as rotas aprendidas por um IBGP para seus vizinhos;
+Resolve o problema do split horizon;
+Retira a necessidade do Full-Mesh;
+Diminui o n.º de relacionamentos entre vizinhos, minimizando assim o n.º de conexões TCP;
+Muito usado por ISP's quando o n.º de declarações internas de vizinhos se torna excessivo;
+Não afeta os caminhos que os pacotes seguem, somente a atualização de rotas;
+Dentro de um AS podem ter vários refletores de rotas;
+Migração fácil, pois é protocolo aberto;
+Pode-se ter mais de um route-reflector server em um Cluster. Todos devem ter o mesmo Cluster-ID.
+Terminologias
+
+Router reflector - O router refletor de rotas que tem a permissão de repassar as rotas aprendidas;
+Clients - quem recebe os anúncios de rotas sempre;
+Cluster - A relação entre os clientes e o router refletor;
+Nonclients - Não são cliente definidos pelo router refletor, mas recebe algumas atualizações de rotas;
+Originator-ID - Atributo que carrega o router ID e o AS de quem originou a rota;
+Cluster ID - Usado quando se tem mais de um router refletor, para reconhecer de quem veio a atualização. Default =Router ID.
+Operação
+
+Refletores recebem atualizações de peer clients e nonclients
+Se a atualização for de um peer client ele reflete para os peer clients e nonclients (exceto para o router que originou);
+Se a atualização for de um nonclient ele reflete para todos os peer clients do cluster;
+Se a atualização for de um parceiro EBGP (outro AS) ele reflete para todos os peer clients e todos nonclients
+Dicas de migração do Refletor de Rota
+
+A primeira consideração é decidir quais routers devem ser os refletores e quais devem ser clientes observando a topologia, pois os refletores precisam de full mesh com os clientes.
+Restrições
+
+Os refletores de rota clientes não são compatíveis com os grupos de parceiros (peer-groups), isso acontece porque um router configurado com um peer-group deve enviar todas as atualizações 
+para todos do peer-group.
+
+Confederation
+
+É a forma de dividir uma AS em várias ASs. Em determinado router configura-se o AS privado (confederation) e dentro do config-router se indica o AS Publico que esse AS privado pertence. 
+Depois adiciona-se os vizinhos de acordo com os ASs privados ou publicos (no caso de uma conexão eBGP).
+Cria-se Sub-AS privados dentro do AS principal;
+Todos os vizinhos internos do AS pertencem ao mesmo Sub-Grupos ao qual estão relacionados.
+
+Multihoming
+
+É o termo usado quando um AS está conectado a mais de um ISP. Os ISP’s aos quais você conecta devem anunciar os seus prefixos na Internet:
+
+Aumenta a confiabilidade da conexão com a Internet com redundância;
+Aumenta o desempenho com distribuição.
+Tipos de configuração Multihoming mais comuns:
+Multihoming sem BGP usa um router conectado a 2 ISPs com configuração de rota statica e NAT;
+Multihoming com BGP usa-se um AS privado para conectar aos ISPs;
+Todos os ISPs passam somente as rotas default para o AS
+O ISP que o AS usa para atingir a Internet será determinado pela métrica IGP, ou seja, do protocolo de roteamento interno;
+Todos os ISPs passam as rotas default e as rotas específicas selecionadas (Clientes que o AS troca muito tráfego);
+Anunciando Redes no BGP
+
+Usando o comando Network ele permite anunciar uma rede que está na tabela IP. A lista de comandos Network deve incluir todas as redes do AS que você deseja anunciar;
+Redistribuindo as rotas estáticas para null 0, usado para anunciar as rotas agregadas. O problema do uso do null 0 é a possível criação de black hole;
+Redistribuição das rotas estáticas do IGP para o BGP. Não recomendado, pois causa instabilidade e propaga para a Internet as oscilações em rotas internas;
+Redistribuição de rotas do BGP para o IGP, deve se tomar cuidado pois a tabela BGP é muito grande. Nos AS’s de ISP a redistribuição do BGP normalmente não é requerida.
+
+Manipulação de Tráfego
+
+Filtros de AS-Path - Muitas das coisas feitas em BGP é baseado na construção desses filtros. Ele cria um filtro para selecionar um caminho específico (rotas) através da rede. 
+Funciona como Access-Lists onde o caractere “^” funciona como o início do path e o “$” como o final do path.
+
+.* - Todas as rotas BGP
+^$ - Rotas que se originam no meu AS
+^(100|200|300)$ - Rotas originadas no 100, 200 ou 300
+^1002$ - Rotas que se originam no AS 1002 , adjacente ao meu AS
+_1002$ - Rotas que terminam no AS 1002
+^1002_ - Rotas originadas no AS 1002
+_1002_ - Rotas que passaram no AS 1002
+(...)+(...) – Uma ou várias ocorrências do caracter especificado antes ( + = ou )
+Community Filters - O atributo Community habilita políticas de roteamento a serem aplicadas para o destino.
+Pode-se criar communities de acordo com o tráfego que deseja-se anunciar para os peers ou usar algumas communities pré definidas:
+
+No-export – Não anuncia para eBGP peers;
+No-advertise – Não anuncia para todos os peers;
+Internet – Anuncia para a comunidade Internet.
+Método de se agrupar rotas com políticas comuns de roteamento;
+Uma rota pode fazer parte de várias communities;
+RFC 1997 – Descreve ações pré definidas;
+32 bits, sendo 16 bits para a AS e outros 16 específicos.
+Route-map
+
+Conjunto de instâncias numeradas;
+Maior facilidade para criação e edição de conjuntos de comandos;
+Normalmente cada instância é composta de comandos “match” e/ou “set”;
+Pode se editar cada instância sem influenciar as demais da Route-map;
+O número seqüencial padrão é 10, esses números são automáticos de 10 em 10 para cada regra;
+Possui um Deny-all no final de cada lista;
+Se uma entrada for criada sem permit ou Deny, o permit é colocado por padrão.
+Prefix List - É uma política de controle que restringe as informações de roteamento que o IOS aprende ou anuncia.
+Características:
+
+Performance significante;
+Suporta modificações incrementais;
+Linha de comando mais amigável;
+Maior flexibilidade;
+Uma lista de prefixo vazia permite tudo;
+Se um prefixo for permitido a rota é usada, caso contrario a rota não é usada;
+O router inicia a pesquisa por uma coincidência na parte superior da lista, a qual é o numero de seqüência mais baixo;
+Se ocorrer uma coincidência o router não procura o resto da lista;
+Negativa implícita ocorre quando o prefixo não coincide com nada;
+Deve ser numerada manualmente sendo o primeiro numero é automaticamente o 5
+Cenário
+
+Objetivo
+
+Seis roteadores (R1, R2, R3, R4, R5 e R6) são conectados fisicamente R1-R2-R3-R4-R5-R6-R1 e devem ser configurados com roteamento BGP seguindo os criterios abaixo:
+
+Os roteadores R1, R2 e R3 possuem como IGP o OSPF na área 0 divulgando suas interfaces físicas;
+Os roteadores R4, R5 e R6 possuem como IGP o ISIS, Level-2 somente, na área 49.0456 divulgando suas interfaces físicas;
+O R1 (AS 123) faz conexão EBGP com o R4 (AS 456);
+O R3 (AS 123) faz conexão EBGP com o R6 (AS 456);
+Os roteadores R2 e R4 deverão ser Router-reflectors dos seus respectivos AS;
+O router-ID de todos os roteadores é o endereço IP das loopbacks;
+Somente as interfaces loopbacks deverão ser divulgadas no BGP em todos os roteadores;
+Os roteadores de borda do AS 123 deverão ser o next-hop para as rotas externas.
+Topologia
+
+
+
+
+IOS utilizados
+
+R1, R2, R3, R4, R5 e R6 – c7200-js-mz.123-7.T.bin
+
+Configuração dos Roteadores
+
+Em todos os roteadores, antes de configurar o roteamento BGP, deve-se configurar o IGP, ou seja, o roteamento interno para que os roteadores possam conhecer o endereço IP para fechar a conexão BGP e também para que a rota seja divulgada na tabela de roteamento BGP. Esse IGP pode ser OSPF, ISIS, estático, etc.
+
+Configurações do OSPF
+
+Para o OSPF a configuração é feita pelo comando “router ospf ” onde o “processo” é um numero do processo OSPF. Para adicionar interfaces usa-se o comando “network
+area ”. Para o roteador fazer vizinhança OSPF é necessário que a rede da interface esteja no comando “network” e a interface não esteja configurada como “passive-interface”.
+
+As interfaces de borda dos roteadores de borda são configuradas como “passive-interface” dentro das configurações de roteamento.
+
+Configurações do ISIS
+
+Para o ISIS, independente da área e level, é configurado pelo comando “router Isis” e não possui o número de área no comando principal como o OSPF. Na configuração de roteamento é adicionado o endereço NSAP, que é o endereço único do roteador no ISIS configurado pelo comando “net” com o formato “49.XXXX.0000.0000.000Y.00. O “49” indica ser uma área privada e o “Y” um valor diferente dos demais roteadores.
+
+Por padrão, todos os roteadores são Level-1-2. Deve-se alterar o level do roteador dentro do “router Isis” ou nas interfaces.
+
+As interfaces de borda dos roteadores de borda são configuradas como “passive-interface” dentro das configurações de roteamento.
+
+Configurações do BGP
+
+Voltando ao BGP, agora que os roteadores conhecem os endreços IPs de seus vizinhos pelo IGP, configura-se o BGP em todos os roteadores pelo comando “router bgp ” onde o “AS” é o 
+Autonomous System do provedor. Dentro da configuração de BGP adicionam-se os vizinhos estaticamente com o comando “neighbor remote-as ”, onde se o “as_vizinho” for igual ao AS do
+roteador a conexão é IBGP, se for diferente será EBGP.
+
+Adiciona-se o IP da interface loopback como Router-ID pelo comando “router-id ”. Para divulgar rede no BGP é necessário que a rede exista na tabela de roteamento interna adicionando o
+comando “network mask ” ou redistribuindo rotas para o BGP com o comando “redistribute”.
+
+Os roteadores dentro do mesmo AS não divulgarão as rotas IBGP entre eles, pois o BGP só divulga para o vizinho rotas aprendidas por EBGP, ou seja, rotas externas. Para isso configura-se 
+os roteadores centrais como Router-reflectors adicionando os demais roteadores como clientes pelo comando “neighbor router-reflector-client”.
+
+Para que os roteadores de borda sejam o next-hop das rotas externas, usa-se o comando “neightbor next-hop-self”, assim as rotas são divulgadas com endereço de destino interno ao AS.
+
+As configurações de BGP atualmente podem ser feitas dentro da família de endereçamento IPv4, ou seja, dentro da configuração de roteamento entra-se no “address-family ipv4” e 
+configuram-se as vizinhanças, router-reflector, community, route-map, etc.
+
+Observações e Bugs
+
+Observe as tabelas de roteamento e o caminho das rotas.
+
+Documentação: http://www.cisco.com/en/US/tech/tk365/technologies_tech_note09186a00800c95bb.shtml
+
+Comandos Importantes de Verificação
+
+R5#show ip bgp
+
+BGP table version is 7, local router ID is 5.5.5.5
