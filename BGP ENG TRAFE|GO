@@ -1,5 +1,7 @@
 
-PATH Selection --> 
+PATH Selection --> IGPs, como EIGRP ou OSPF, escolhem rotas com base na métrica mais baixa. Eles tentam encontrar o caminho mais curto e rápido para levar o tráfego ao seu destino. 
+O BGP, entretanto, possui uma forma diferente de seleção de rota. Atribui vários atributos a cada caminho; esses atributos podem ser manipulados administrativamente para controlar o caminho selecionado. 
+Em seguida, ele examina o valor desses atributos de maneira ordenada até que possa restringir todas as rotas possíveis a um único caminho.
 
 Prefix-list ---> ma lista de prefixos permite que os sistemas de roteamento determinem quais rotas devem ser aceitas quando eles fazem peering com outras redes . 
 Inclui prefixos IP com critérios de correspondência que permitem ou negam a redistribuição de rotas. Ele contém uma ou mais entradas ordenadas que são processadas sequencialmente.
@@ -8,7 +10,13 @@ Route map ----> Route Maps fornecem muitos recursos diferentes para uma variedad
 No nível mais simples, elas podem filtrar redes, mas também fornecem recursos adicionais por meio da adição ou modificação de atributos de rede.
 Route Maps são críticas para o BGP porque são o principal componente na modificação de uma política de roteamento exclusiva por vizinho
 
-AS-PATH ----->
+AS-PATH -----> A lista de acesso baseada em AS-Path é usada para fazer filtro das rotas que serão divulgadas ou aprendidas baseada no AS a que elas pertencem. 
+Esse filtro é bastante utilizado em ISPs que possuem conexão eBGP com clientes e com outros ISPs. 
+Normalmente somente se envia as rotas dos AS dos clientes para um ISP de peering e não as rotas de outro ISP. Esse filtro é feito com AS-path Access-list.
+O AS-path Access-list usa expressão regular para descrever um filtro, onde deve ser considerado o as-path do roteador que esta sendo configurado o filtro.
+O AS-Path é definido como um caminho do seu AS até o AS a qual a rota pertence da esquerda para a direita, por exemplo, 
+a rota “3.3.3.3/32” possui o AS_PATH “5 2 3 i”, ou seja, o seu AS é o 5 e a rede está localizada no AS 3 que deve ser alcançado através do AS 2. 
+O filtro deve ser baseado nessa informação usando expressão regula
 
 Agregação de rotas -----> A sumarização ou agregação de rotas é a técnica para diminuir o tamanho da tabela de roteamento.
 
