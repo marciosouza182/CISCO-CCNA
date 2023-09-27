@@ -1,0 +1,97 @@
+Engenharia de tráfego: Influenciar o upload manipulando o Weight
+
+R8#
+(1)conf t
+(2)ip prefix-list REDE20 permit 1.10.20.0/24
+
+R8#
+(1)route-map PIKACHU
+(2)match ip address prefix-list REDE20
+(3)set weight 666
+(4)route-map PIKACHU permit 20
+(5)exit
+2
+R8#
+(1)router bgp 819
+(2)neighbor 10.91.0.1 route-map PIKACHU in
+(3)end
+(4)wr
+
+Engenharia de tráfego: Influenciar o upload manipulando o Local Preference
+
+R8#
+(1)conf t
+(2)router bgp 819
+(3)no neighbor 10.91.0.1 route-map PIKACHU in
+
+R8#
+(1)conf t
+(2)route-map BULBA
+(3)match ip address prefix-list REDE20
+(4)set local-preference 777
+(5)route-map BULBA permit 20
+(6)exit
+
+router bgp 819
+(2)neighbor 78.0.0.2 route-map BULBA in
+(3)end
+(4)clear ip bgp * soft
+
+CONFIGURAÇÃO PARTE 4 - Engenharia de tráfego:Influenciar o download
+
+R3#
+(1)conf t
+(2)ip prefix-list REDE20 deny 1.10.20.0/24
+(3)ip prefix-list REDE20 permit 0.0.0.0/0 le 32
+(4)router bgp 12345
+(5)neighbor 73.0.0.2 prefix-list REDE20 out
+(6)end
+(7)wr
+1
+R4#
+(1)conf t
+(2)ip prefix-list REDE10 deny 1.10.10.0/24
+(3)ip prefix-list REDE10 permit 0.0.0.0/0 le 32
+(4)router bgp 12345
+(5)neighbor 46.0.0.2 prefix-list REDE10 out
+(6)end
+(7)wr
+2
+R5#
+(1)conf t
+(2)ip prefix-list REDE10 deny 1.10.10.0/24
+(3)ip prefix-list REDE10 permit 0.0.0.0/0 le 32
+(4)router bgp 12345
+(5)neighbor 46.0.0.2 prefix-list REDE10 out
+(6)end
+(7)wr
+
+CONFIGURAÇÃO PARTE 5 - Engenharia de tráfego: Evitar o trânsito pelo AS12345 AS PATH
+
+R3#
+(1)conf t
+(2)ip as-path access-list 1 permit ^$
+(3)router bgp 12345
+(4)neighbor 73.0.0.2 filter-list 1 out
+(5)end
+(6)wr
+1
+R4#
+(1)conf t
+(2)ip as-path access-list 1 permit ^$
+(3)router bgp 12345
+(4)neighbor 46.0.0.2 filter-list 1 out
+(5)end
+(6)wr
+2
+R5#
+(1)conf t
+(2)ip as-path access-list 1 permit ^$
+(3)router bgp 12345
+(4)neighbor 56.0.0.2 filter-list 1 out
+(5)end
+(6)wr
+
+
+
+
