@@ -1,0 +1,19 @@
+Engenharia de tráfego: Influenciar o upload manipulando o Weight
+
+R8#
+(1)conf t
+(2)ip prefix-list REDE20 permit 1.10.20.0/24
+
+R8#
+(1)route-map PIKACHU
+(2)match ip address prefix-list REDE20
+(3)set weight 666
+(4)route-map PIKACHU permit 20
+(5)exit
+2
+R8#
+(1)router bgp 819
+(2)neighbor 10.91.0.1 route-map PIKACHU in
+(3)end
+(4)wr
+3
