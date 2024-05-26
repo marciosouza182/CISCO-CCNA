@@ -1,1 +1,35 @@
+Inspeção ARP Dinâmica
+
+Em um ataque ARP típico, um agente de ameaça pode enviar respostas ARP não solicitadas a outros hosts na sub-rede com o endereço MAC do agente de ameaça 
+e o endereço IP do gateway padrão. Para evitar o spoofing de ARP e o envenenamento de ARP resultante, um switch deve garantir que apenas solicitações 
+e respostas ARP válidas sejam retransmitidas. A inspeção dinâmica de ARP (DAI) requer DHCP snooping e ajuda a prevenir ataques ARP:
+
+Exemplo de configuração DAI:
+
+S1(config)# ip dhcp snooping
+S1(config)# ip dhcp snooping vlan 10
+S1(config)# ip arp inspection vlan 10
+S1(config)# interface fa0/24
+S1(config-if)# ip dhcp snooping trust
+S1(config-if)# ip arp inspection trust
+
+S1(config)# ip arp inspection validate src-mac dst-mac ip
+S1(config)# do show run | include validate 
+
+Outros exemplos:
+
+No momento, você está conectado ao S1. Habilite o rastreamento de DHCP globalmente para o switch.
+
+S1(config)#ip dhcp snooping
+Entre no modo de configuração de interface para g0 / 1 – 2, confie nas interfaces para rastreamento DHCP e DAI e, em seguida, retorne ao modo de configuração global.
+
+S1(config)#interface range g0/1 - 2
+S1(config-if-range)#ip dhcp snooping trust
+S1(config-if-range)#ip arp inspection trust
+S1(config-if-range)#exit
+Habilite DHCP snooping e DAI para VLANs 10,20,30-49.
+
+S1(config)#ip dhcp snooping vlan 10,20,30-49
+S1(config)#ip arp inspection vlan 10,20,30-49
+S1(config)#
 
