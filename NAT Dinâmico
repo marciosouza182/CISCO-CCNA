@@ -1,1 +1,34 @@
 
+No cenário, defina um pool de endereços IPv4 públicos sob o nome de pool NAT-POOL1.
+
+#R2(config)# ip nat pool NAT-POOL1 209.165.200.226 209.165.200.240 netmask 255.255.255.224
+
+Configure uma ACL padrão para identificar (permitir) apenas os endereços que devem ser traduzidos. Uma ACL muito permissiva pode levar a resultados imprevisíveis. Lembre-se de que há uma instrução deny all implícita no final de cada ACL.
+
+No cenário, defina quais endereços são elegíveis para tradução.
+
+#R2(config)# access-list 1 permit 192.168.0.0 0.0.255.255
+
+
+Vincule a ACL ao pool, usando a seguinte sintaxe de comando:
+
+#Router(config)# ip nat inside source list {access-list-number | access-list-name} pool pool-name
+
+Esta configuração é usada pelo roteador para identificar quais dispositivos (list) recebem quais endereços (pool). Nesse cenário, ligue o NAT-POOL1 ao ACL 1.
+
+#R2(config)# ip nat inside source list 1 pool NAT-POOL1
+Identificar quais interfaces estão dentro, em relação ao NAT; esta será qualquer interface que se conecte à rede interna.
+
+Nesse cenário, identifique a interface serial 0/1/0 como uma interface NAT interna.
+
+#R2(config)# interface serial 0/1/0
+#R2(config-if)# ip nat inside
+
+Identificar quais interfaces estão externas, em relação ao NAT; esta será qualquer interface que se conecte à rede externa.
+
+Nesse cenário, identifique a interface serial 0/1/1 como a interface NAT externa.
+
+#R2(config)# interface serial 0/1/1
+#R2(config-if)# ip nat outside
+
+
