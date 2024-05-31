@@ -1,1 +1,61 @@
+Autenticação de Protocolo de Roteamento OSPF MD5
+
+O OSPF apoia a autenticação do protocolo de roteamento usando o MD5. A autenticação MD5 pode ser permitida globalmente para todas as interfaces ou em uma base por interface.
+
+Habilite a autenticação OSPF MD5 globalmente:
+
+Comando de configuração de interface ip ospf message-digest-key key md5 password.
+Comando de configuração de roteamento area area-id authentication message-digest .
+Este método força a autenticação em todas as interfaces habilitadas para OSPF. Se uma interface não estiver configurada com o ip ospf message-digest-key , ele não poderá formar adjacências com outros vizinhos OSPF.
+Habilite a autenticação MD5 em uma base por interface:
+
+Comando de configuração de interface ip ospf message-digest-key key md5 password.
+Comando de configuração de interface ip ospf authentication message-digest .
+
+A configuração da interface substitui a configuração global. As senhas de autenticação MD5 não precisam ser as mesmas em uma área. No entanto, eles precisam ser os mesmos entre os vizinhos.
+
+R1# conf t 
+R1(config)# interface s0/0/0
+R1(config-if)# ip ospf message-digest-key 1 md5 cisco12345
+R1(config-if)# ip ospf authentication message-digest 
+
+Autenticação do protocolo de roteamento OSPF SHA
+
+MD5 agora é considerado vulnerável a ataques e só deve ser usado quando uma autenticação mais forte não está disponível. O Cisco IOS release 15.4 (1) T adicionou suporte para autenticação OSPF SHA, conforme detalhado no RFC 5709. Consequentemente, o administrador deve usar a autenticação SHA contanto que todos os sistemas operacionais do roteador apoiam a autenticação OSPF SHA.
+
+A autenticação OSPF SHA inclui duas etapas principais. A sintaxe dos comandos é mostrada na figura:
+
+Etapa 1. Especifique um chaveiro de autenticação no modo de configuração global:
+
+Configure um nome de chaveiro com o comando key chain.
+Atribua ao chaveiro um número e uma senha com os comandos key e key-string.
+Especifique a autenticação SHA com o comando cryptographic-algorithm.
+Especifique quando esta chave irá expirar com o comando send-lifetime (Opcional).
+
+
+Para configurar o OSPF com autenticação SHA, você deve primeiramente configurar um chaveiro:
+
+Entre com o comando key chain para criar um chaveiro chamado SHA256.
+Atribuir ao chaveiro o número 1
+Atribua a string de chave o nome de ospfSHA256.
+Atribua hmac-sha-256 como o algoritmo criptográfico.
+Enter exit duas vezes para sair da configuração do chaveiro.
+R1(config)#key chain SHA256
+R1(config-keychain)#key 1
+R1(config-keychain-key)#key-string ospfSHA256
+R1(config-keychain-key)#cryptographic-algorithm hmac-sha-256
+R1(config-keychain-key)#exit
+R1(config-keychain)#exit
+Entre no modo de configuração da interface e atribua key-chain SHA256 para autenticação OSPF em S0/0/0.
+
+R1(config)#interface S0/0/0
+R1(config-if)#ip ospf authentication key-chain SHA256
+R1(config-if)#  
+
+
+
+
+
+
+
 
